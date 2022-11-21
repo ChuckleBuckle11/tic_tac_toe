@@ -18,4 +18,27 @@ html, body{
     right: 0;
     
     margin: auto;
+
+    display:flex;
+    flex-direction: column;
+}
+
+.row{
+    flex:1;
+    display:flex;
+}
+
+.cell{
+    flex:1;
+    margin:0;
+    padding:0;
+
+    
+    border:3px solid black;
+    color: black;
+    font-size: 64px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
