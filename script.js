@@ -1,8 +1,7 @@
 //Game board module
-
 const gameBoard = (() => {
     //board array
-    let board = [];
+    let board = ['','','','','','','','',''];
 
     // All possible win combos for any player
     const winCombos = [    
@@ -30,17 +29,30 @@ const gameBoard = (() => {
 
     const setCell = (index, mark) => {
         if (index > board.length) return;
-        board[index] = sign;
+        board[index] = mark;
+        console.log(board);
     }
 
-    return {board, turns, getCell, setCell}; //module exports
+    const reset = () => {
+        for (let i = 0; i < board.length; i++){
+            board[i] = '';
+        }
+    }
+
+    return {board, turns, winner, getCell, setCell, reset}; //module exports
 })();
+
+
+
 
 //Game Controller
 const gameController = (() => {
 
     let round = 1;
     let gameOver = false;
+    let currentPlayer = "O";
+
+
     const playerFactory = (name,mark,turn) => {
         return {name,mark,turn}; 
     }
@@ -50,29 +62,43 @@ const gameController = (() => {
     const playerX = playerFactory('Player X', "X", false);
 
 
-    const getCurrentPlayerSign = () => round%2 === 0 ? playerO.mark : playerX.mark;
-
-    const playRound = (cell) => {
-        if (gameOver || gameBoard.getCell(cell) !== '') return;
+    const getCurrentPlayerSign = () => {
+        return round%2 == 0 ? playerO.mark : playerX.mark;
     }
 
-    return {playRound, reset};
+
+    const playRound = (cellID) =>{
+        if (gameBoard.getCell(cellID) != "" || gameOver) return;
+        gameBoard.setCell(cellID, getCurrentPlayerSign());
+
+
+        round++;
+    }
+
+
+    return {playRound};
 })();
 
+
+
 // Display controller
-
-
 const displayController = (() => {
-    console.log("ASDF")
     const cells = document.querySelectorAll(".cell");
-    cells.forEach((cell) => {
-        cell.addEventListener('click', (e) =>{
+    console.log(cells)
 
+    cells.forEach((cell) => {
+        cell.addEventListener('click', (e) =>{      
+            gameController.playRound(e.target["id"]);
+            updateGameBoard();
         })
     })
 
 
-    
+    const updateGameBoard = function(){
+        for (i = 0; i < gameBoard.board.length; i++ ) {
+            cells[i].textContent = gameBoard.board[i];
+        }
+    }
 
     const resetBoard = function (){
         let cells = document.getElementsByClassName("cell");
