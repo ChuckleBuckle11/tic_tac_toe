@@ -33,7 +33,8 @@ const gameController = (() => {
     let round = 1;
     let gameOver = false;
     let currentPlayer = "O";
-    let cells = document.querySelectorAll(".cell");
+    let draw = 0;
+    let winner = null;
     // All possible win combos for any player
     const winCombos = [
         [0, 1, 2],
@@ -67,10 +68,16 @@ const gameController = (() => {
         if (gameBoard.getCell(cellID) != "" || gameOver) return;
         gameBoard.setCell(cellID, getCurrentPlayerSign());
 
+        if (getCurrentPlayerSign() == playerO.mark){
+            playerOchoices.push(Number(cellID))
+        }
 
-        //
+        else if (getCurrentPlayerSign() == playerX.mark){
+            playerXchoices.push(Number(cellID))
+        }
+        console.log(`ROUND ${round}`)
 
-        // checkWin();
+        checkWin();
         round++;
     }
 
@@ -78,21 +85,43 @@ const gameController = (() => {
         round = 1;
         gameOver = false;
         currentPlayer = "O";
-
+        draw = 0;
+        playerOchoices = [];
+        playerXchoices = [];
     }
 
     checkWin = () => {
+        //Draw!
+        console.log(round)
         if (round >= 9){
-            //Draw!
+            gameController.draw = 1;
+            draw = 1;
             return;
         }
 
+        // No player can win earlier than 5 rounds
+        if (round >= 5){
+            for (combo of winCombos){
+                if (combo.every(el => playerOchoices.includes(el))){
+                    gameController.winner = "O";
+                    gameController.gameOver = 1;
+                    gameOver = 1;
+                    displayController.declareWinner(gameController.winner);
+                }
 
+                if (combo.every(el => playerXchoices.includes(el))){
+                    gameController.winner = "X"
+                    gameController.gameOver = 1;
+                    gameOver = 1;
+                    displayController.declareWinner(gameController.winner); 
+                }
+            }
+        }
+        
     }
 
-    return {playRound, getCurrentPlayerSign, resetRounds};
+    return {playRound, getCurrentPlayerSign, resetRounds, draw, gameOver};
 })();
-
 
 
 // Display controller
@@ -109,10 +138,16 @@ const displayController = (() => {
     })
 
     const updateGameBoard = function(){
+        console.log(gameController.draw)
         for (i = 0; i < gameBoard.board.length; i++ ) {
             cells[i].textContent = gameBoard.board[i];
         }
-        updateMessaage();
+        if (gameController.gameOver) return;
+        if (gameController.draw){
+            updateMessage(`Draw!`);
+            return;
+        }
+        updateMessage(`It's ${gameController.getCurrentPlayerSign()}'s turn!`);
     }
 
     const resetBoard = function(){
@@ -125,14 +160,20 @@ const displayController = (() => {
         })
     }
 
-    const updateMessaage = function(){
+    const updateMessage = (string) => {
         const currentPlayer = gameController.getCurrentPlayerSign();
-        messageCtn.textContent = `It's ${currentPlayer}'s turn!`
+        messageCtn.textContent = string;
     }
+
+    const declareWinner = (winner) =>{
+        console.log(`${winner} wins!`)
+        updateMessage(`${winner} wins!`)
+    }
+
 
     resetBtn.addEventListener('click',resetBoard);
 
-    return {resetBoard};
+    return {resetBoard, updateMessage, declareWinner};
 })();
 
 
